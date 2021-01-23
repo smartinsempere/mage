@@ -82,8 +82,13 @@ class RielleTheEverwiseTriggeredAbility extends TriggeredAbilityImpl {
             return false;
         }
         this.getEffects().clear();
-        this.addEffect(new DrawCardSourceControllerEffect(event.getAmount()));
+        this.addEffect(new DrawCardSourceControllerEffect(getAmount(event)));
         return true;
+    }
+
+    private Integer getAmount(GameEvent event) {
+        return event.getType() == GameEvent.EventType.DISCARDED_CARDS ?
+                event.getAmount() : 1;
     }
 
     @Override
@@ -107,10 +112,13 @@ class RielleTheEverwiseWatcher extends Watcher {
 
     @Override
     public void watch(GameEvent event, Game game) {
-        if (event.getType() == GameEvent.EventType.DISCARDED_CARDS
-                && event.getAmount() > 0) {
+        if (isDiscardedCardsEvent(event)) {
             discardedThisTurn.merge(event.getPlayerId(), 1, Integer::sum);
         }
+    }
+
+    private boolean isDiscardedCardsEvent(GameEvent event) {
+        return event.getType() == GameEvent.EventType.DISCARDED_CARDS && event.getAmount() > 0;
     }
 
     @Override
